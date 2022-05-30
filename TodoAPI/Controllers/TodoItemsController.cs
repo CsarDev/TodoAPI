@@ -9,28 +9,21 @@ namespace TodoApi.Controllers
     [ApiController]
     public class TodoItemsController : ControllerBase
     {
-        //private readonly Repository.Models.TodoHomeContext _context;
 
         private static IUnitOfWork _unitOfWork;
         private static UnityContainerResolver _resolver;
 
-        public TodoItemsController(/*Repository.Models.TodoHomeContext context*/)
+        public TodoItemsController()
         {
             _resolver = new UnityContainerResolver();
-            //_context = context;
         }
 
         // GET: api/TodoItems
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItemDTO>>> GetTodoItems()
-        {
-            //return await _context.TodoItems
-            //    .Select(x => ItemToDTO(x))
-            //    .ToListAsync();
+        {       
             _unitOfWork = (IUnitOfWork)_resolver.Resolver();
-            //var a =_unitOfWork.TodoItemPgRepository.GetAll().Select(x => ItemToDTOPg(x)).ToListAsync();
-            //return await _unitOfWork.TodoItemPgRepository.GetAll().Select(x => ItemToDTOPg(x)).ToListAsync();
-
+            
             return await _unitOfWork.TodoItemRepository.GetAll().Select(x => ItemToDTO(x)).ToListAsync();
         }
 
@@ -40,7 +33,6 @@ namespace TodoApi.Controllers
         {
             _unitOfWork = (IUnitOfWork)_resolver.Resolver();
             var todoItem = _unitOfWork.TodoItemRepository.GetByID(id);
-            //var todoItem = await _context.TodoItems.FindAsync(id);
 
             if (todoItem == null)
             {
@@ -69,26 +61,8 @@ namespace TodoApi.Controllers
             oldEntity.Name = todoItemDTO.Name;
             oldEntity.IsComplete = todoItemDTO.IsComplete;
 
-
             var todoItem = _unitOfWork.TodoItemRepository.Update(oldEntity);
 
-            //var todoItem = await _context.TodoItems.FindAsync(id);
-            //if (todoItem == null)
-            //{
-            //    return NotFound();
-            //}
-
-            //todoItem.Name = todoItemDTO.Name;
-            //todoItem.IsComplete = todoItemDTO.IsComplete;
-
-            //try
-            //{
-            //    await _context.SaveChangesAsync();
-            //}
-            //catch (DbUpdateConcurrencyException) when (!TodoItemExists(id))
-            //{
-            //    return NotFound();/
-            //}
             if(todoItem == null)
             {
                 return NotFound();
@@ -107,9 +81,6 @@ namespace TodoApi.Controllers
                 Name = todoItemDTO.Name
             };
 
-            //_context.TodoItems.Add(todoItem);
-            //await _context.SaveChangesAsync();
-
             _unitOfWork = (IUnitOfWork)_resolver.Resolver();
             var todoItemAdded = _unitOfWork.TodoItemRepository.Add(todoItem);
 
@@ -123,7 +94,6 @@ namespace TodoApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTodoItem(int id)
         {
-            //var todoItem = await _context.TodoItems.FindAsync(id);
             _unitOfWork = (IUnitOfWork)_resolver.Resolver();
             var todoItem = _unitOfWork.TodoItemRepository.GetByID(id);
 
@@ -145,14 +115,6 @@ namespace TodoApi.Controllers
         }
 
         private static TodoItemDTO ItemToDTO(Repository.Models.TodoItem todoItem) =>
-            new TodoItemDTO
-            {
-                Id = todoItem.Id,
-                Name = todoItem.Name,
-                IsComplete = todoItem.IsComplete
-            };
-
-        private static TodoItemDTO ItemToDTOPg (Repository.ModelsPostgres.TodoItem todoItem) =>
             new TodoItemDTO
             {
                 Id = todoItem.Id,
